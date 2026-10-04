@@ -239,18 +239,18 @@
     <script>
         lucide.createIcons();
 
-        // Pre-configured Supabase Credentials
-        const DEFAULT_SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co";
-        const DEFAULT_SUPABASE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb";
+        // Hardcoded Supabase Credentials
+        const SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb";
 
         function getSupabaseUrl() {
             const val = localStorage.getItem('parentsynch_api_url');
-            return (val && val.trim() !== '') ? val : DEFAULT_SUPABASE_URL;
+            return (val && val.trim() !== '') ? val : SUPABASE_URL;
         }
 
         function getSupabaseKey() {
             const val = localStorage.getItem('parentsynch_api_key');
-            return (val && val.trim() !== '') ? val : DEFAULT_SUPABASE_KEY;
+            return (val && val.trim() !== '') ? val : SUPABASE_KEY;
         }
 
         let dashboardData = {
@@ -258,6 +258,7 @@
             deviceName: "Alex's Device (Waiting for sync...)",
             deviceModel: "Unknown",
             batteryLevel: 0,
+            isCharging: false,
             isOnline: false,
             lastSynced: "Never",
             apps: []
@@ -266,12 +267,12 @@
         function renderDashboard() {
             document.getElementById('deviceName').textContent = dashboardData.deviceName;
             document.getElementById('deviceIdText').textContent = `ID: ${dashboardData.childId}`;
-            document.getElementById('batteryLevelText').textContent = `${dashboardData.batteryLevel}%`;
+            const chargingBadge = dashboardData.isCharging ? ' ⚡ (Charging)' : '';
+            document.getElementById('batteryLevelText').textContent = `${dashboardData.batteryLevel}%${chargingBadge}`;
             document.getElementById('batteryProgressBar').style.width = `${dashboardData.batteryLevel}%`;
             document.getElementById('lastSyncedText').textContent = dashboardData.lastSynced;
 
             const badge = document.getElementById('deviceOnlineBadge');
-            const statusDot = document.getElementById('statusDot');
             if (dashboardData.isOnline) {
                 badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
                 badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Online';
@@ -327,8 +328,8 @@
         function saveConfig() {
             const url = document.getElementById('apiUrlInput').value;
             const key = document.getElementById('apiKeyInput').value;
-            localStorage.setItem('parentsynch_api_url', url || DEFAULT_SUPABASE_URL);
-            localStorage.setItem('parentsynch_api_key', key || DEFAULT_SUPABASE_KEY);
+            localStorage.setItem('parentsynch_api_url', url || SUPABASE_URL);
+            localStorage.setItem('parentsynch_api_key', key || SUPABASE_KEY);
             document.getElementById('connectionStatus').textContent = "Supabase configuration saved successfully!";
             document.getElementById('connectionStatus').className = "mt-3 text-xs font-medium text-emerald-600";
             setTimeout(() => toggleConfigModal(), 1200);
@@ -344,7 +345,7 @@
             statusEl.className = "mt-3 text-xs font-medium text-indigo-600";
 
             try {
-                const response = await fetch(`${url}/rest/v1/device_sync?select=*&limit=1`, {
+                const response = await fetch(`${url}/rest/v1/device_reports?select=*&limit=1`, {
                     headers: {
                         'apikey': key,
                         'Authorization': `Bearer ${key}`
@@ -371,7 +372,7 @@
             const key = getSupabaseKey();
 
             try {
-                const res = await fetch(`${url}/rest/v1/device_sync?childId=eq.child_alex_01&order=timestamp.desc&limit=1`, {
+                const res = await fetch(`${url}/rest/v1/device_reports?select=*&order=updated_at.desc&limit=1`, {
                     headers: {
                         'apikey': key,
                         'Authorization': `Bearer ${key}`
@@ -381,20 +382,30 @@
                     const rows = await res.json();
                     if (rows && rows.length > 0) {
                         const latest = rows[0];
-                        const status = latest.deviceStatus || latest;
-                        dashboardData.deviceName = status.deviceId ? `Alex's Device (${status.deviceId})` : "Alex's Galaxy S23";
-                        dashboardData.deviceModel = status.batteryHealth ? `Battery Health: ${status.batteryHealth}` : "Connected";
-                        dashboardData.batteryLevel = Math.round((status.batteryLevel !== undefined ? status.batteryLevel : 0) * (status.batteryLevel <= 1 ? 100 : 1));
-                        dashboardData.isOnline = status.isOnline !== undefined ? status.isOnline : true;
-                        dashboardData.lastSynced = new Date(status.timestamp || Date.now()).toLocaleTimeString();
 
-                        if (latest.appUsageReports && Array.isArray(latest.appUsageReports)) {
-                            dashboardData.apps = latest.appUsageReports.map(report => ({
-                                appName: report.appName || report.packageName,
-                                packageName: report.packageName,
+                        // Parse required fields: device_id, battery_level, is_charging, app_usage_json
+                        const deviceId = latest.device_id || latest.deviceId || "child_alex_01";
+                        const batteryLevel = latest.battery_level !== undefined ? latest.battery_level : (latest.batteryLevel !== undefined ? latest.batteryLevel : 0);
+                        const isCharging = latest.is_charging !== undefined ? latest.is_charging : (latest.isCharging !== undefined ? latest.isCharging : false);
+                        const appUsageJson = latest.app_usage_json || latest.appUsageReports || latest.app_usage_reports || [];
+                        const isOnline = latest.is_online !== undefined ? latest.is_online : (latest.isOnline !== undefined ? latest.isOnline : true);
+                        const updatedAt = latest.updated_at || latest.sync_timestamp || latest.timestamp || Date.now();
+
+                        dashboardData.childId = deviceId;
+                        dashboardData.deviceName = `Alex's Device (${deviceId})`;
+                        dashboardData.deviceModel = isCharging ? "Charging ⚡" : "Discharging";
+                        dashboardData.batteryLevel = Math.round(batteryLevel <= 1 ? batteryLevel * 100 : batteryLevel);
+                        dashboardData.isCharging = isCharging;
+                        dashboardData.isOnline = isOnline;
+                        dashboardData.lastSynced = new Date(updatedAt).toLocaleTimeString();
+
+                        if (Array.isArray(appUsageJson)) {
+                            dashboardData.apps = appUsageJson.map(report => ({
+                                appName: report.app_name || report.appName || report.packageName || report.package_name,
+                                packageName: report.packageName || report.package_name,
                                 category: report.category || "General",
-                                usageMinutes: Math.round((report.usageTimeMillis || 0) / 60000),
-                                status: "Allowed"
+                                usageMinutes: Math.round((report.usage_time_millis || report.usageTimeMillis || 0) / 60000),
+                                status: report.status || "Allowed"
                             }));
                         }
                     }
@@ -406,7 +417,7 @@
             setTimeout(() => {
                 if (refreshIcon) refreshIcon.classList.remove('animate-spin');
                 renderDashboard();
-                logCommand("SYNC", "Refreshed device status from Supabase.");
+                logCommand("SYNC", "Refreshed device status from Supabase device_reports.");
             }, 600);
         }
 
@@ -416,7 +427,7 @@
 
             const cmd = {
                 commandId: 'cmd_' + Date.now(),
-                childId: "child_alex_01",
+                childId: dashboardData.childId || "child_alex_01",
                 commandType: commandType,
                 packageName: packageName,
                 quotaMinutes: quotaMinutes,
@@ -515,11 +526,11 @@
         window.addEventListener('DOMContentLoaded', () => {
             const currentUrl = localStorage.getItem('parentsynch_api_url');
             if (!currentUrl || currentUrl.trim() === '') {
-                localStorage.setItem('parentsynch_api_url', DEFAULT_SUPABASE_URL);
+                localStorage.setItem('parentsynch_api_url', SUPABASE_URL);
             }
             const currentKey = localStorage.getItem('parentsynch_api_key');
             if (!currentKey || currentKey.trim() === '') {
-                localStorage.setItem('parentsynch_api_key', DEFAULT_SUPABASE_KEY);
+                localStorage.setItem('parentsynch_api_key', SUPABASE_KEY);
             }
             document.getElementById('apiUrlInput').value = getSupabaseUrl();
             document.getElementById('apiKeyInput').value = getSupabaseKey();
