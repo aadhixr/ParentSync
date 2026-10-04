@@ -27,6 +27,26 @@ object SyncApiClient {
 
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor { chain ->
+                val originalRequest = chain.request()
+                val authHeader = originalRequest.header("Authorization")
+                val builder = originalRequest.newBuilder()
+
+                if (originalRequest.header("apikey") == null) {
+                    builder.header("apikey", SUPABASE_PUBLISHABLE_KEY)
+                }
+
+                if (authHeader != null) {
+                    val token = authHeader.removePrefix("Bearer ").trim()
+                    val parts = token.split(".")
+                    if (parts.size != 3) {
+                        // Supabase publishable/secret keys are not valid JWTs (they have 1 part).
+                        // Omit Authorization header to prevent PostgREST 401 JWT error.
+                        builder.removeHeader("Authorization")
+                    }
+                }
+                chain.proceed(builder.build())
+            }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
