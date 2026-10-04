@@ -437,7 +437,7 @@
             logCommand(commandType, packageName ? `Target: ${packageName}` : 'Broadcast to device');
 
             try {
-                const response = await fetch(`${url}/rest/v1/commands`, {
+                const response = await fetch(`${url}/rest/v1/remote_commands`, {
                     method: 'POST',
                     headers: {
                         'apikey': key,

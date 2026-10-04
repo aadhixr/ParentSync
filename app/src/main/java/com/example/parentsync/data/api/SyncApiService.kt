@@ -29,7 +29,7 @@ interface SyncApiService {
         @Body payload: SyncPayloadDto
     ): Response<ResponseBody>
 
-    @GET("rest/v1/commands")
+    @GET("rest/v1/remote_commands")
     suspend fun fetchCommands(
         @Header("apikey") apiKey: String,
         @Header("Authorization") authorization: String,
