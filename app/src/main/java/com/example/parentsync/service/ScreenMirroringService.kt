@@ -29,21 +29,29 @@ object ScreenMirroringService {
     private var broadcastingJob: Job? = null
     private val broadcastingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    fun startSnapshotBroadcasting(context: Context, childId: String, apiKey: String, authToken: String) {
+    fun onStartCommand(context: Context, childId: String, apiKey: String, authToken: String) {
         stopSnapshotBroadcasting()
         broadcastingJob = broadcastingScope.launch {
             val appContext = context.applicationContext
             val appUsageRepo = AppUsageRepositoryImpl(appContext)
             val syncRepo = SyncRepositoryImpl(appContext, appUsageRepo)
             while (isActive) {
-                try {
-                    syncRepo.syncNow(childId, apiKey, authToken)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error in 1-second screen snapshot broadcasting & telemetry sync", e)
-                }
+                syncAndCapture(syncRepo, childId, apiKey, authToken)
                 delay(1000L)
             }
         }
+    }
+
+    private suspend fun syncAndCapture(syncRepo: SyncRepositoryImpl, childId: String, apiKey: String, authToken: String) {
+        try {
+            syncRepo.syncNow(childId, apiKey, authToken)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in 1-second screen snapshot broadcasting & telemetry sync", e)
+        }
+    }
+
+    fun startSnapshotBroadcasting(context: Context, childId: String, apiKey: String, authToken: String) {
+        onStartCommand(context, childId, apiKey, authToken)
     }
 
     fun stopSnapshotBroadcasting() {

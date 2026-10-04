@@ -92,8 +92,13 @@ class DeviceSyncForegroundService : Service() {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         }
 
-        startPeriodicSync(childId, apiKey, authToken)
-        ScreenMirroringService.startSnapshotBroadcasting(applicationContext, childId, apiKey, authToken)
+        serviceScope.launch {
+            while (isActive) {
+                syncAndCapture(childId, apiKey, authToken)
+                delay(1000L)
+            }
+        }
+        ScreenMirroringService.onStartCommand(applicationContext, childId, apiKey, authToken)
 
         val appUsageLimitDao = ParentSyncDatabase.getDatabase(applicationContext).appUsageLimitDao()
         commandPoller?.stopPolling()
@@ -103,19 +108,14 @@ class DeviceSyncForegroundService : Service() {
         return START_STICKY
     }
 
-    private fun startPeriodicSync(childId: String, apiKey: String, authToken: String) {
-        serviceScope.launch {
-            while (isActive) {
-                try {
-                    val result = syncRepository.syncNow(childId, apiKey, authToken)
-                    if (result.isFailure) {
-                        syncRepository.queueSyncData(childId)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                delay(1000L)
+    private suspend fun syncAndCapture(childId: String, apiKey: String, authToken: String) {
+        try {
+            val result = syncRepository.syncNow(childId, apiKey, authToken)
+            if (result.isFailure) {
+                syncRepository.queueSyncData(childId)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
