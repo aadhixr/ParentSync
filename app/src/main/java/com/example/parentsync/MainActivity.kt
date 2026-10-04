@@ -42,6 +42,7 @@ import com.example.parentsync.service.DeviceSyncForegroundService
 import com.example.parentsync.service.ParentSyncAdminReceiver
 import com.example.parentsync.ui.permissions.PermissionSetupScreen
 import com.example.parentsync.ui.theme.ParentSyncTheme
+import com.example.parentsync.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -230,7 +231,7 @@ fun NodeStatusScreen(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = "Version 1.0.4 (Release)",
+                                text = "Version ${BuildConfig.VERSION_NAME} (Release)",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
