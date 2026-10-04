@@ -14,7 +14,7 @@ data class InstalledAppDto(
 @JsonClass(generateAdapter = true)
 data class DeviceStatusDto(
     @Json(name = "device_id") @SerialName("device_id") val deviceId: String,
-    @Json(name = "battery_level") @SerialName("battery_level") val batteryLevel: Float, // 0.0 to 1.0
+    @Json(name = "battery_level") @SerialName("battery_level") val batteryLevel: Int, // 0 to 100
     @Json(name = "is_charging") @SerialName("is_charging") val isCharging: Boolean,
     @Json(name = "battery_health") @SerialName("battery_health") val batteryHealth: String,
     @Json(name = "active_foreground_package") @SerialName("active_foreground_package") val activeForegroundPackage: String?,
@@ -36,7 +36,7 @@ data class AppUsageReportDto(
 @JsonClass(generateAdapter = true)
 data class SyncPayloadDto(
     @Json(name = "device_id") @SerialName("device_id") val deviceId: String,
-    @Json(name = "battery_level") @SerialName("battery_level") val batteryLevel: Float,
+    @Json(name = "battery_level") @SerialName("battery_level") val batteryLevel: Int,
     @Json(name = "is_charging") @SerialName("is_charging") val isCharging: Boolean,
     @Json(name = "app_usage_json") @SerialName("app_usage_json") val appUsageReports: List<AppUsageReportDto>,
     @Json(name = "device_status") @SerialName("device_status") val deviceStatus: DeviceStatusDto,

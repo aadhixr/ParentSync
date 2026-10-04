@@ -149,11 +149,15 @@ class SyncRepositoryImpl(
             null
         }
 
-        val batteryPct: Float = batteryStatus?.let { intent ->
+        val batteryLevelInt: Int = batteryStatus?.let { intent ->
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-            if (level >= 0 && scale > 0) level / scale.toFloat() else 1.0f
-        } ?: 1.0f
+            if (level >= 0 && scale > 0) {
+                Math.round((level.toFloat() / scale.toFloat()) * 100).coerceIn(0, 100)
+            } else {
+                100
+            }
+        } ?: 100
 
         val isCharging: Boolean = batteryStatus?.let { intent ->
             val status: Int = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
@@ -182,7 +186,7 @@ class SyncRepositoryImpl(
 
         return DeviceStatusDto(
             deviceId = childId,
-            batteryLevel = batteryPct,
+            batteryLevel = batteryLevelInt,
             isCharging = isCharging,
             batteryHealth = batteryHealthStr,
             activeForegroundPackage = activeForegroundPkg,
