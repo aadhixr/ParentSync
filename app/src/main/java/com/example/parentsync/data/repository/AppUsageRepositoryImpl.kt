@@ -61,7 +61,7 @@ class AppUsageRepositoryImpl(
         val usages = if (hasUsageStatsPermission()) {
             queryRealUsageStats()
         } else {
-            getMockUsageStats()
+            emptyList()
         }
 
         _appUsages.value = usages.sortedByDescending { it.usageTimeMillis }
@@ -70,7 +70,7 @@ class AppUsageRepositoryImpl(
 
     private fun queryRealUsageStats(): List<AppUsage> {
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-            ?: return getMockUsageStats()
+            ?: return emptyList()
 
         val calendar = Calendar.getInstance()
         val endTime = calendar.timeInMillis
@@ -84,7 +84,7 @@ class AppUsageRepositoryImpl(
         )
 
         if (stats.isNullOrEmpty()) {
-            return getMockUsageStats()
+            return emptyList()
         }
 
         val packageManager = context.packageManager
@@ -114,7 +114,7 @@ class AppUsageRepositoryImpl(
             }
         }
 
-        return if (result.isEmpty()) getMockUsageStats() else result
+        return result
     }
 
     private fun categorizeApp(packageName: String, appName: String): AppCategory {
@@ -139,18 +139,6 @@ class AppUsageRepositoryImpl(
 
             else -> AppCategory.OTHER
         }
-    }
-
-    private fun getMockUsageStats(): List<AppUsage> {
-        return listOf(
-            AppUsage("com.google.android.youtube", "YouTube Kids", 2 * 3600 * 1000L + 15 * 60 * 1000L, AppCategory.ENTERTAINMENT),
-            AppUsage("com.whatsapp", "WhatsApp", 1 * 3600 * 1000L + 45 * 60 * 1000L, AppCategory.SOCIAL),
-            AppUsage("com.roblox.client", "Roblox", 1 * 3600 * 1000L + 20 * 60 * 1000L, AppCategory.GAMES),
-            AppUsage("com.duolingo", "Duolingo", 45 * 60 * 1000L, AppCategory.EDUCATION),
-            AppUsage("com.google.android.apps.docs", "Google Docs", 30 * 60 * 1000L, AppCategory.PRODUCTIVITY),
-            AppUsage("com.instagram.android", "Instagram", 25 * 60 * 1000L, AppCategory.SOCIAL),
-            AppUsage("com.android.chrome", "Chrome", 15 * 60 * 1000L, AppCategory.OTHER)
-        )
     }
 
     private fun calculateSummaryAndBreakdowns(usages: List<AppUsage>) {
