@@ -7,7 +7,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object SyncApiClient {
-    private const val DEFAULT_BASE_URL = "https://your-backend-project.supabase.co/"
+    const val DEFAULT_BASE_URL = "https://iheemahzwatffkhjjouw.supabase.co/"
+    const val DEFAULT_API_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb"
 
     fun create(baseUrl: String = DEFAULT_BASE_URL): SyncApiService {
         val logging = HttpLoggingInterceptor().apply {

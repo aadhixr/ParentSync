@@ -57,23 +57,23 @@
         <div id="configSection" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hidden">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                    <i data-lucide="database" class="w-5 h-5 mr-2 text-indigo-600"></i> Backend & Supabase Connection
+                    <i data-lucide="database" class="w-5 h-5 mr-2 text-indigo-600"></i> Supabase Real-Time Backend Connection
                 </h3>
                 <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                Connect ParentSync web dashboard to your Supabase project or REST API backend to receive live device telemetry and dispatch remote commands.
+                Connected to Supabase project for live device telemetry and remote command dispatching.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="apiUrlInput" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">API / Supabase URL</label>
-                    <input type="text" id="apiUrlInput" placeholder="https://your-project.supabase.co" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label for="apiUrlInput" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">SUPABASE_URL</label>
+                    <input type="text" id="apiUrlInput" placeholder="https://iheemahzwatffkhjjouw.supabase.co" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
-                    <label for="apiKeyInput" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Supabase Anon Key / API Key</label>
-                    <input type="password" id="apiKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label for="apiKeyInput" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">SUPABASE_PUBLISHABLE_KEY</label>
+                    <input type="password" id="apiKeyInput" placeholder="sb_publishable_..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-4">
@@ -93,29 +93,29 @@
                         <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
                             <i data-lucide="smartphone" class="w-5 h-5 mr-2 text-indigo-600"></i> Child Device Status
                         </h2>
-                        <span id="deviceOnlineBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Online
+                        <span id="deviceOnlineBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300">
+                            <span class="w-2 h-2 rounded-full bg-slate-400 mr-1.5" id="statusDot"></span> Connecting...
                         </span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Device Name & ID</span>
-                            <div class="mt-1 font-bold text-slate-900 dark:text-white text-base" id="deviceName">Alex's Galaxy S23</div>
+                            <div class="mt-1 font-bold text-slate-900 dark:text-white text-base" id="deviceName">Loading device...</div>
                             <div class="text-xs text-slate-400 mt-0.5" id="deviceIdText">ID: child_alex_01</div>
                         </div>
                         <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Battery Level</span>
                             <div class="mt-1 flex items-center justify-between">
-                                <span class="font-bold text-slate-900 dark:text-white text-base" id="batteryLevelText">84%</span>
-                                <i data-lucide="battery-charging" class="w-5 h-5 text-emerald-600" id="batteryIcon"></i>
+                                <span class="font-bold text-slate-900 dark:text-white text-base" id="batteryLevelText">0%</span>
+                                <i data-lucide="battery" class="w-5 h-5 text-indigo-600" id="batteryIcon"></i>
                             </div>
                             <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
-                                <div id="batteryProgressBar" class="bg-emerald-500 h-2 rounded-full" style="width: 84%"></div>
+                                <div id="batteryProgressBar" class="bg-indigo-500 h-2 rounded-full" style="width: 0%"></div>
                             </div>
                         </div>
                         <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Last Synced</span>
-                            <div class="mt-1 font-bold text-slate-900 dark:text-white text-sm" id="lastSyncedText">Just now</div>
+                            <div class="mt-1 font-bold text-slate-900 dark:text-white text-sm" id="lastSyncedText">Never</div>
                             <div class="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5 font-medium cursor-pointer" onclick="refreshDashboardData()">Tap to refresh</div>
                         </div>
                     </div>
@@ -131,7 +131,7 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time usage statistics synced from child's phone</p>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-lg" id="totalScreenTimeBadge">Total Today: 2h 45m</span>
+                            <span class="text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-lg" id="totalScreenTimeBadge">Total Today: 0h 0m</span>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -146,7 +146,9 @@
                                 </tr>
                             </thead>
                             <tbody id="appUsageTableBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
-                                <!-- Populated dynamically by JS -->
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400 italic">Waiting for telemetry data from Supabase...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -181,7 +183,7 @@
                     <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                         <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Recent Command Dispatch Log</h3>
                         <div id="commandLog" class="space-y-2 text-xs bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 max-h-40 overflow-y-auto">
-                            <div class="text-slate-400 italic">No commands dispatched yet today.</div>
+                            <div class="text-slate-400 italic">No commands dispatched yet.</div>
                         </div>
                     </div>
                 </div>
@@ -196,13 +198,8 @@
             <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Block Selected App</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Choose an app to block instantly on the child's device.</p>
             <div class="space-y-3 mb-4">
-                <label for="blockAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Select App</label>
-                <select id="blockAppSelect" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    <option value="com.zhiliaoapp.musically">TikTok (com.zhiliaoapp.musically)</option>
-                    <option value="com.instagram.android">Instagram (com.instagram.android)</option>
-                    <option value="com.google.android.youtube">YouTube (com.google.android.youtube)</option>
-                    <option value="com.roblox.client">Roblox (com.roblox.client)</option>
-                </select>
+                <label for="blockAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Package Name / App ID</label>
+                <input type="text" id="blockAppSelect" placeholder="com.zhiliaoapp.musically" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
             <div class="flex justify-end space-x-3">
                 <button onclick="closeModals()" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl text-sm font-medium">Cancel</button>
@@ -218,13 +215,8 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Set daily time limit (in minutes) for managed apps.</p>
             <div class="space-y-4 mb-4">
                 <div>
-                    <label for="quotaAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target App</label>
-                    <select id="quotaAppSelect" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <option value="com.google.android.youtube">YouTube</option>
-                        <option value="com.zhiliaoapp.musically">TikTok</option>
-                        <option value="com.roblox.client">Roblox</option>
-                        <option value="com.instagram.android">Instagram</option>
-                    </select>
+                    <label for="quotaAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Package Name</label>
+                    <input type="text" id="quotaAppSelect" placeholder="com.google.android.youtube" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="quotaMinutesInput" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Daily Quota (Minutes)</label>
@@ -247,21 +239,26 @@
     <script>
         lucide.createIcons();
 
-        // Sample Data & State
+        // Pre-configured Supabase Credentials
+        const DEFAULT_SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co";
+        const DEFAULT_SUPABASE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb";
+
+        function getSupabaseUrl() {
+            return localStorage.getItem('parentsynch_api_url') || DEFAULT_SUPABASE_URL;
+        }
+
+        function getSupabaseKey() {
+            return localStorage.getItem('parentsynch_api_key') || DEFAULT_SUPABASE_KEY;
+        }
+
         let dashboardData = {
             childId: "child_alex_01",
-            deviceName: "Alex's Galaxy S23",
-            deviceModel: "Samsung SM-S911B",
-            batteryLevel: 84,
-            isOnline: true,
-            lastSynced: new Date().toLocaleTimeString(),
-            apps: [
-                { appName: "YouTube", packageName: "com.google.android.youtube", category: "Entertainment", usageMinutes: 75, status: "Allowed" },
-                { appName: "TikTok", packageName: "com.zhiliaoapp.musically", category: "Social", usageMinutes: 45, status: "Allowed" },
-                { appName: "Roblox", packageName: "com.roblox.client", category: "Games", usageMinutes: 60, status: "Allowed" },
-                { appName: "Google Classroom", packageName: "com.google.android.apps.classroom", category: "Education", usageMinutes: 35, status: "Allowed" },
-                { appName: "Instagram", packageName: "com.instagram.android", category: "Social", usageMinutes: 20, status: "Blocked" }
-            ]
+            deviceName: "Alex's Device (Waiting for sync...)",
+            deviceModel: "Unknown",
+            batteryLevel: 0,
+            isOnline: false,
+            lastSynced: "Never",
+            apps: []
         };
 
         function renderDashboard() {
@@ -272,6 +269,7 @@
             document.getElementById('lastSyncedText').textContent = dashboardData.lastSynced;
 
             const badge = document.getElementById('deviceOnlineBadge');
+            const statusDot = document.getElementById('statusDot');
             if (dashboardData.isOnline) {
                 badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
                 badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Online';
@@ -281,13 +279,18 @@
             }
 
             // Total Screen Time
-            const totalMins = dashboardData.apps.reduce((acc, app) => acc + app.usageMinutes, 0);
+            const totalMins = dashboardData.apps.reduce((acc, app) => acc + (app.usageMinutes || 0), 0);
             const hrs = Math.floor(totalMins / 60);
             const mins = totalMins % 60;
             document.getElementById('totalScreenTimeBadge').textContent = `Total Today: ${hrs}h ${mins}m`;
 
             // Table body
             const tbody = document.getElementById('appUsageTableBody');
+            if (dashboardData.apps.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">No app usage telemetry reported yet.</td></tr>';
+                return;
+            }
+
             tbody.innerHTML = dashboardData.apps.map(app => `
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition">
                     <td class="py-3.5 px-4 font-medium text-slate-900 dark:text-white">
@@ -298,7 +301,7 @@
                         <div class="text-xs text-slate-400 font-normal">${app.packageName}</div>
                     </td>
                     <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300">${app.category}</td>
-                    <td class="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">${Math.floor(app.usageMinutes / 60)}h ${app.usageMinutes % 60}m</td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">${Math.floor((app.usageMinutes || 0) / 60)}h ${(app.usageMinutes || 0) % 60}m</td>
                     <td class="py-3.5 px-4">
                         <span class="px-2.5 py-1 rounded-full text-xs font-medium ${app.status === 'Blocked' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}">
                             ${app.status}
@@ -322,82 +325,96 @@
         function saveConfig() {
             const url = document.getElementById('apiUrlInput').value;
             const key = document.getElementById('apiKeyInput').value;
-            localStorage.setItem('parentsynch_api_url', url);
-            localStorage.setItem('parentsynch_api_key', key);
-            document.getElementById('connectionStatus').textContent = "Configuration saved successfully!";
+            localStorage.setItem('parentsynch_api_url', url || DEFAULT_SUPABASE_URL);
+            localStorage.setItem('parentsynch_api_key', key || DEFAULT_SUPABASE_KEY);
+            document.getElementById('connectionStatus').textContent = "Supabase configuration saved successfully!";
             document.getElementById('connectionStatus').className = "mt-3 text-xs font-medium text-emerald-600";
             setTimeout(() => toggleConfigModal(), 1200);
+            refreshDashboardData();
         }
 
         async function testConnection() {
-            const url = document.getElementById('apiUrlInput').value || localStorage.getItem('parentsynch_api_url');
-            const key = document.getElementById('apiKeyInput').value || localStorage.getItem('parentsynch_api_key');
+            const url = document.getElementById('apiUrlInput').value || getSupabaseUrl();
+            const key = document.getElementById('apiKeyInput').value || getSupabaseKey();
             const statusEl = document.getElementById('connectionStatus');
 
-            if (!url) {
-                statusEl.textContent = "Please enter a valid API URL.";
-                statusEl.className = "mt-3 text-xs font-medium text-red-600";
-                return;
-            }
-
-            statusEl.textContent = "Connecting to backend...";
+            statusEl.textContent = "Connecting to Supabase...";
             statusEl.className = "mt-3 text-xs font-medium text-indigo-600";
 
             try {
-                // If using Supabase, test endpoint
                 const response = await fetch(`${url}/rest/v1/device_sync?select=*&limit=1`, {
                     headers: {
                         'apikey': key,
                         'Authorization': `Bearer ${key}`
                     }
                 });
-                if (response.ok || response.status === 401 || response.status === 404) {
-                    statusEl.textContent = "Connection successful! Endpoint reachable.";
+                if (response.ok || response.status === 200 || response.status === 404) {
+                    statusEl.textContent = "Supabase connection successful!";
                     statusEl.className = "mt-3 text-xs font-medium text-emerald-600";
                 } else {
-                    statusEl.textContent = `Connected with status ${response.status}`;
+                    statusEl.textContent = `Connected with status code ${response.status}`;
                     statusEl.className = "mt-3 text-xs font-medium text-amber-600";
                 }
             } catch (err) {
-                statusEl.textContent = "Live server reachability check passed (Mock mode fallback active).";
-                statusEl.className = "mt-3 text-xs font-medium text-emerald-600";
+                statusEl.textContent = `Connection reachability error: ${err.message}`;
+                statusEl.className = "mt-3 text-xs font-medium text-red-600";
             }
         }
 
         async function refreshDashboardData() {
             const refreshIcon = document.getElementById('refreshIcon');
-            refreshIcon.classList.add('animate-spin');
+            if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
-            const url = localStorage.getItem('parentsynch_api_url');
-            const key = localStorage.getItem('parentsynch_api_key');
+            const url = getSupabaseUrl();
+            const key = getSupabaseKey();
 
-            if (url && key) {
-                try {
-                    const res = await fetch(`${url}/rest/v1/device_sync?childId=eq.child_alex_01&order=timestamp.desc&limit=1`, {
-                        headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data && data.length > 0) {
-                            dashboardData.lastSynced = new Date().toLocaleTimeString();
+            try {
+                const res = await fetch(`${url}/rest/v1/device_sync?childId=eq.child_alex_01&order=timestamp.desc&limit=1`, {
+                    headers: {
+                        'apikey': key,
+                        'Authorization': `Bearer ${key}`
+                    }
+                });
+                if (res.ok) {
+                    const rows = await res.json();
+                    if (rows && rows.length > 0) {
+                        const latest = rows[0];
+                        const status = latest.deviceStatus || latest;
+                        dashboardData.deviceName = status.deviceId ? `Alex's Device (${status.deviceId})` : "Alex's Galaxy S23";
+                        dashboardData.deviceModel = status.batteryHealth ? `Battery Health: ${status.batteryHealth}` : "Connected";
+                        dashboardData.batteryLevel = Math.round((status.batteryLevel !== undefined ? status.batteryLevel : 0) * (status.batteryLevel <= 1 ? 100 : 1));
+                        dashboardData.isOnline = status.isOnline !== undefined ? status.isOnline : true;
+                        dashboardData.lastSynced = new Date(status.timestamp || Date.now()).toLocaleTimeString();
+
+                        if (latest.appUsageReports && Array.isArray(latest.appUsageReports)) {
+                            dashboardData.apps = latest.appUsageReports.map(report => ({
+                                appName: report.appName || report.packageName,
+                                packageName: report.packageName,
+                                category: report.category || "General",
+                                usageMinutes: Math.round((report.usageTimeMillis || 0) / 60000),
+                                status: "Allowed"
+                            }));
                         }
                     }
-                } catch (e) {
-                    console.log("Cloud sync fallback to local simulation");
                 }
+            } catch (e) {
+                console.log("Supabase fetch failed:", e);
             }
 
             setTimeout(() => {
-                refreshIcon.classList.remove('animate-spin');
-                dashboardData.lastSynced = new Date().toLocaleTimeString();
+                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
                 renderDashboard();
-                logCommand("SYNC", "Synced device telemetry successfully.");
-            }, 800);
+                logCommand("SYNC", "Refreshed device status from Supabase.");
+            }, 600);
         }
 
-        function sendCommand(commandType, packageName = null, quotaMinutes = null) {
+        async function sendCommand(commandType, packageName = null, quotaMinutes = null) {
+            const url = getSupabaseUrl();
+            const key = getSupabaseKey();
+
             const cmd = {
                 commandId: 'cmd_' + Date.now(),
+                childId: "child_alex_01",
                 commandType: commandType,
                 packageName: packageName,
                 quotaMinutes: quotaMinutes,
@@ -406,18 +423,34 @@
 
             logCommand(commandType, packageName ? `Target: ${packageName}` : 'Broadcast to device');
 
-            // If lock/unlock device, update local state
-            if (commandType === 'LOCK_DEVICE') {
-                alert("🔒 Instant Lock command dispatched to device!");
-            } else if (commandType === 'UNLOCK_DEVICE') {
-                alert("🔓 Unlock command dispatched to device!");
-            } else if (commandType === 'BLOCK_APP') {
-                alert(`🚫 Block command sent for ${packageName}`);
+            try {
+                const response = await fetch(`${url}/rest/v1/commands`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': key,
+                        'Authorization': `Bearer ${key}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(cmd)
+                });
+                if (response.ok || response.status === 201) {
+                    alert(`✅ Command ${commandType} sent to Supabase successfully!`);
+                } else {
+                    alert(`⚠️ Command submitted (Status: ${response.status})`);
+                }
+            } catch (err) {
+                alert(`⚠️ Command logged locally (Network: ${err.message})`);
+            }
+
+            if (commandType === 'BLOCK_APP' && packageName) {
                 const app = dashboardData.apps.find(a => a.packageName === packageName);
                 if (app) app.status = 'Blocked';
                 renderDashboard();
-            } else if (commandType === 'UPDATE_QUOTA') {
-                alert(`⏱️ Daily quota updated to ${quotaMinutes} minutes for ${packageName}`);
+            } else if (commandType === 'UNLOCK_APP' && packageName) {
+                const app = dashboardData.apps.find(a => a.packageName === packageName);
+                if (app) app.status = 'Allowed';
+                renderDashboard();
             }
         }
 
@@ -447,16 +480,22 @@
         }
 
         function submitBlockApp() {
-            const select = document.getElementById('blockAppSelect');
-            const pkg = select.value;
+            const pkg = document.getElementById('blockAppSelect').value.trim();
+            if (!pkg) {
+                alert("Please enter a package name.");
+                return;
+            }
             closeModals();
             sendCommand('BLOCK_APP', pkg);
         }
 
         function submitQuotaUpdate() {
-            const select = document.getElementById('quotaAppSelect');
-            const pkg = select.value;
+            const pkg = document.getElementById('quotaAppSelect').value.trim();
             const minutes = parseInt(document.getElementById('quotaMinutesInput').value) || 60;
+            if (!pkg) {
+                alert("Please enter a package name.");
+                return;
+            }
             closeModals();
             sendCommand('UPDATE_QUOTA', pkg, minutes);
         }
@@ -472,11 +511,20 @@
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('parentsynch_api_url')) {
+                localStorage.setItem('parentsynch_api_url', DEFAULT_SUPABASE_URL);
+            }
+            if (!localStorage.getItem('parentsynch_api_key')) {
+                localStorage.setItem('parentsynch_api_key', DEFAULT_SUPABASE_KEY);
+            }
+            document.getElementById('apiUrlInput').value = getSupabaseUrl();
+            document.getElementById('apiKeyInput').value = getSupabaseKey();
+
             renderDashboard();
-            const savedUrl = localStorage.getItem('parentsynch_api_url');
-            const savedKey = localStorage.getItem('parentsynch_api_key');
-            if (savedUrl) document.getElementById('apiUrlInput').value = savedUrl;
-            if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+            refreshDashboardData();
+
+            // Auto-refresh every 30 seconds
+            setInterval(refreshDashboardData, 30000);
         });
     </script>
 </body>

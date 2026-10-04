@@ -44,9 +44,9 @@ class MainActivity : ComponentActivity() {
         // Start foreground service for background syncing & remote commands monitoring
         DeviceSyncForegroundService.startService(
             this,
-            childId = "child_device_001",
-            apiKey = "sup_anon_key_mock",
-            authToken = "sup_auth_token_mock"
+            childId = "child_alex_01",
+            apiKey = com.example.parentsync.data.api.SyncApiClient.DEFAULT_API_KEY,
+            authToken = com.example.parentsync.data.api.SyncApiClient.DEFAULT_API_KEY
         )
 
         setContent {
