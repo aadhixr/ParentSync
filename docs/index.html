@@ -244,11 +244,13 @@
         const DEFAULT_SUPABASE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb";
 
         function getSupabaseUrl() {
-            return localStorage.getItem('parentsynch_api_url') || DEFAULT_SUPABASE_URL;
+            const val = localStorage.getItem('parentsynch_api_url');
+            return (val && val.trim() !== '') ? val : DEFAULT_SUPABASE_URL;
         }
 
         function getSupabaseKey() {
-            return localStorage.getItem('parentsynch_api_key') || DEFAULT_SUPABASE_KEY;
+            const val = localStorage.getItem('parentsynch_api_key');
+            return (val && val.trim() !== '') ? val : DEFAULT_SUPABASE_KEY;
         }
 
         let dashboardData = {
@@ -511,10 +513,12 @@
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('parentsynch_api_url')) {
+            const currentUrl = localStorage.getItem('parentsynch_api_url');
+            if (!currentUrl || currentUrl.trim() === '') {
                 localStorage.setItem('parentsynch_api_url', DEFAULT_SUPABASE_URL);
             }
-            if (!localStorage.getItem('parentsynch_api_key')) {
+            const currentKey = localStorage.getItem('parentsynch_api_key');
+            if (!currentKey || currentKey.trim() === '') {
                 localStorage.setItem('parentsynch_api_key', DEFAULT_SUPABASE_KEY);
             }
             document.getElementById('apiUrlInput').value = getSupabaseUrl();
