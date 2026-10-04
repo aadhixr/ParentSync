@@ -2,10 +2,36 @@ package com.example.parentsync.data.api
 
 import android.util.Base64
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
+
+class NullOnEmptyConverterFactory : Converter.Factory() {
+    override fun responseBodyConverter(
+        type: Type,
+        annotations: Array<out Annotation>,
+        retrofit: Retrofit
+    ): Converter<ResponseBody, *>? {
+        val delegate = retrofit.nextResponseBodyConverter<Any>(this, type, annotations)
+        return Converter<ResponseBody, Any?> { body ->
+            if (body.contentLength() == 0L) {
+                null
+            } else {
+                try {
+                    delegate.convert(body)
+                } catch (e: java.io.EOFException) {
+                    null
+                } catch (e: com.squareup.moshi.JsonDataException) {
+                    if (e.cause is java.io.EOFException) null else throw e
+                }
+            }
+        }
+    }
+}
 
 object SyncApiClient {
     const val SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co"
@@ -36,6 +62,10 @@ object SyncApiClient {
                     builder.header("apikey", SUPABASE_PUBLISHABLE_KEY)
                 }
 
+                if (originalRequest.header("Prefer") == null) {
+                    builder.header("Prefer", "return=representation")
+                }
+
                 if (authHeader != null) {
                     val token = authHeader.removePrefix("Bearer ").trim()
                     val parts = token.split(".")
@@ -55,6 +85,7 @@ object SyncApiClient {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(client)
+            .addConverterFactory(NullOnEmptyConverterFactory())
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
             .create(SyncApiService::class.java)

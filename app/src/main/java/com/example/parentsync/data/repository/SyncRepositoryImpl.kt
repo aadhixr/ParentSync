@@ -69,8 +69,13 @@ class SyncRepositoryImpl(
                 return@withContext Result.failure(e)
             }
 
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+            if (response.isSuccessful) {
+                val syncResponse = response.body() ?: SyncResponseDto(
+                    success = true,
+                    message = "Sync successful",
+                    serverTimestamp = System.currentTimeMillis()
+                )
+                Result.success(syncResponse)
             } else {
                 val errorMsg = try {
                     response.errorBody()?.string() ?: "Unknown sync error"
@@ -110,8 +115,9 @@ class SyncRepositoryImpl(
                 }
             }
 
-            if (response != null && response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+            if (response != null && response.isSuccessful) {
+                val commands = response.body() ?: emptyList()
+                Result.success(commands)
             } else {
                 Result.success(emptyList())
             }

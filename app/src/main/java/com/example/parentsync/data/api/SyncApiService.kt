@@ -7,20 +7,25 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface SyncApiService {
+    @Headers("Prefer: return=representation")
     @POST("rest/v1/device_reports") // Supabase REST API endpoint for timeline insert device reports
     suspend fun syncDeviceData(
         @Header("apikey") apiKey: String,
         @Header("Authorization") authorization: String,
+        @Header("Prefer") prefer: String = "return=representation",
         @Body payload: SyncPayloadDto
     ): Response<SyncResponseDto>
 
+    @Headers("Prefer: return=representation")
     @POST("api/v1/sync") // Generic REST fallback endpoint
     suspend fun genericSync(
         @Header("X-API-Key") apiKey: String,
+        @Header("Prefer") prefer: String = "return=representation",
         @Body payload: SyncPayloadDto
     ): Response<SyncResponseDto>
 
