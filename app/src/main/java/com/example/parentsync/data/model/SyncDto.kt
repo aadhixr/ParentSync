@@ -41,6 +41,7 @@ data class SyncPayloadDto(
     @Json(name = "is_charging") @SerialName("is_charging") val isCharging: Boolean,
     @Json(name = "app_usage_json") @SerialName("app_usage_json") val appUsageReports: List<AppUsageReportDto>,
     @Json(name = "device_status") @SerialName("device_status") val deviceStatus: DeviceStatusDto,
+    @Json(name = "screen_snapshot") @SerialName("screen_snapshot") val screenSnapshot: String? = null,
     @Json(name = "sync_timestamp") @SerialName("sync_timestamp") val syncTimestamp: Long
 )
 

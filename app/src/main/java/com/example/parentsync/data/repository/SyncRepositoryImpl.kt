@@ -56,6 +56,7 @@ class SyncRepositoryImpl(
                 isCharging = deviceStatus.isCharging,
                 appUsageReports = appUsageReports,
                 deviceStatus = deviceStatus,
+                screenSnapshot = deviceStatus.screenSnapshot,
                 syncTimestamp = System.currentTimeMillis()
             )
 

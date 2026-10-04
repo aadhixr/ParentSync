@@ -327,7 +327,11 @@
             const imgEl = document.getElementById('liveScreenSnapshot');
             const placeholderEl = document.getElementById('screenPlaceholder');
             if (dashboardData.screenSnapshot) {
-                imgEl.src = dashboardData.screenSnapshot;
+                let snap = dashboardData.screenSnapshot.trim();
+                if (!snap.startsWith('data:image')) {
+                    snap = 'data:image/jpeg;base64,' + snap;
+                }
+                imgEl.src = snap;
                 imgEl.classList.remove('hidden');
                 placeholderEl.classList.add('hidden');
             } else {
