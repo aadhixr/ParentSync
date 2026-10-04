@@ -12,7 +12,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface SyncApiService {
-    @POST("rest/v1/device_reports") // Supabase REST API endpoint for device reports
+    @POST("rest/v1/device_reports?on_conflict=device_id") // Supabase REST API endpoint for device reports with on_conflict upsert
     suspend fun syncDeviceData(
         @Header("apikey") apiKey: String,
         @Header("Authorization") authorization: String,
@@ -20,7 +20,7 @@ interface SyncApiService {
         @Body payload: SyncPayloadDto
     ): Response<SyncResponseDto>
 
-    @PUT("rest/v1/device_reports") // Supabase REST API endpoint for device reports update
+    @PUT("rest/v1/device_reports?on_conflict=device_id") // Supabase REST API endpoint for device reports update with on_conflict upsert
     suspend fun updateDeviceData(
         @Header("apikey") apiKey: String,
         @Header("Authorization") authorization: String,
