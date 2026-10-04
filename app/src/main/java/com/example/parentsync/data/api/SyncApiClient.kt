@@ -63,7 +63,7 @@ object SyncApiClient {
                 }
 
                 if (originalRequest.header("Prefer") == null) {
-                    builder.header("Prefer", "return=representation")
+                    builder.header("Prefer", "return=minimal")
                 }
 
                 if (authHeader != null) {

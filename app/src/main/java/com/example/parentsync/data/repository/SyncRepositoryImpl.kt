@@ -70,7 +70,7 @@ class SyncRepositoryImpl(
             }
 
             if (response.isSuccessful) {
-                val syncResponse = response.body() ?: SyncResponseDto(
+                val syncResponse = SyncResponseDto(
                     success = true,
                     message = "Sync successful",
                     serverTimestamp = System.currentTimeMillis()
