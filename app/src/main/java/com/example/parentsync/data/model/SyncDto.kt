@@ -3,10 +3,21 @@ package com.example.parentsync.data.model
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
+data class InstalledAppDto(
+    val packageName: String,
+    val appName: String,
+    val isSystemApp: Boolean
+)
+
+@JsonClass(generateAdapter = true)
 data class DeviceStatusDto(
     val deviceId: String,
     val batteryLevel: Float, // 0.0 to 1.0
     val isCharging: Boolean,
+    val batteryHealth: String,
+    val activeForegroundPackage: String?,
+    val deviceLocked: Boolean,
+    val installedApps: List<InstalledAppDto>,
     val isOnline: Boolean,
     val timestamp: Long
 )

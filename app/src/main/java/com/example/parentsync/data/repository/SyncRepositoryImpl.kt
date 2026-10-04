@@ -1,5 +1,6 @@
 package com.example.parentsync.data.repository
 
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -8,9 +9,11 @@ import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import com.example.parentsync.data.api.SyncApiClient
 import com.example.parentsync.data.api.SyncApiService
+import com.example.parentsync.data.local.DeviceStateManager
 import com.example.parentsync.data.local.ParentSyncDatabase
 import com.example.parentsync.data.model.AppUsageReportDto
 import com.example.parentsync.data.model.DeviceStatusDto
+import com.example.parentsync.data.model.InstalledAppDto
 import com.example.parentsync.data.model.RemoteCommandDto
 import com.example.parentsync.data.model.SyncPayloadDto
 import com.example.parentsync.data.model.SyncResponseDto
@@ -55,10 +58,9 @@ class SyncRepositoryImpl(
     }
 
     override suspend fun queueSyncData(childId: String) = withContext(Dispatchers.IO) {
-        // Queueing logic for offline storage or local cache if needed
         val deviceStatus = gatherDeviceStatus(childId)
         val appUsageReports = gatherAppUsageReports()
-        // Here we could persist to Room DB or SharedPreferences queue if offline
+        // Queueing logic for offline storage or local cache if needed
     }
 
     override suspend fun pollCommands(childId: String, apiKey: String, authToken: String): Result<List<RemoteCommandDto>> = withContext(Dispatchers.IO) {
@@ -100,15 +102,59 @@ class SyncRepositoryImpl(
             status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
         } ?: false
 
+        val batteryHealthCode = batteryStatus?.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN) ?: BatteryManager.BATTERY_HEALTH_UNKNOWN
+        val batteryHealthStr = when (batteryHealthCode) {
+            BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
+            BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
+            BatteryManager.BATTERY_HEALTH_DEAD -> "Dead"
+            BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> "Over Voltage"
+            BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
+            else -> "Unknown"
+        }
+
+        val deviceLocked = DeviceStateManager.getInstance(context).isDeviceLocked.value
+        val activeForegroundPkg = getActiveForegroundPackage()
+        val installedApps = getInstalledAppsList()
         val isOnline = checkOnlineStatus()
 
         return DeviceStatusDto(
             deviceId = childId,
             batteryLevel = batteryPct,
             isCharging = isCharging,
+            batteryHealth = batteryHealthStr,
+            activeForegroundPackage = activeForegroundPkg,
+            deviceLocked = deviceLocked,
+            installedApps = installedApps,
             isOnline = isOnline,
             timestamp = System.currentTimeMillis()
         )
+    }
+
+    private fun getActiveForegroundPackage(): String? {
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - 1000 * 60 * 5 // last 5 minutes
+        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime)
+        if (stats.isNullOrEmpty()) return null
+        return stats.maxByOrNull { it.lastTimeUsed }?.packageName
+    }
+
+    private fun getInstalledAppsList(): List<InstalledAppDto> {
+        val pm = context.packageManager
+        val packages = pm.getInstalledPackages(0)
+        return packages.map { pkgInfo ->
+            val appName = try {
+                pkgInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() } ?: pkgInfo.packageName
+            } catch (e: Exception) {
+                pkgInfo.packageName
+            }
+            val isSystem = (pkgInfo.applicationInfo?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0
+            InstalledAppDto(
+                packageName = pkgInfo.packageName,
+                appName = appName,
+                isSystemApp = isSystem
+            )
+        }
     }
 
     private suspend fun gatherAppUsageReports(): List<AppUsageReportDto> {
