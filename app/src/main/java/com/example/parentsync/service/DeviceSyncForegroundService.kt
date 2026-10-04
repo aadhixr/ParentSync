@@ -21,7 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class DeviceSyncForegroundService : Service() {
 
@@ -74,6 +74,7 @@ class DeviceSyncForegroundService : Service() {
         val action = intent?.action
         if (action == ACTION_STOP_SYNC) {
             commandPoller?.stopPolling()
+            ScreenMirroringService.stopSnapshotBroadcasting()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
@@ -92,6 +93,7 @@ class DeviceSyncForegroundService : Service() {
         }
 
         startPeriodicSync(childId, apiKey, authToken)
+        ScreenMirroringService.startSnapshotBroadcasting(applicationContext, childId, apiKey, authToken)
 
         val appUsageLimitDao = ParentSyncDatabase.getDatabase(applicationContext).appUsageLimitDao()
         commandPoller?.stopPolling()
@@ -112,7 +114,7 @@ class DeviceSyncForegroundService : Service() {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                delay(15.minutes)
+                delay(1000L)
             }
         }
     }
@@ -153,6 +155,7 @@ class DeviceSyncForegroundService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         commandPoller?.stopPolling()
+        ScreenMirroringService.stopSnapshotBroadcasting()
         serviceJob.cancel()
     }
 }

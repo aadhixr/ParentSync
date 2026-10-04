@@ -10,12 +10,46 @@ import android.util.Base64
 import android.util.Log
 import androidx.core.graphics.scale
 import com.example.parentsync.data.local.DeviceStateManager
+import com.example.parentsync.data.repository.AppUsageRepositoryImpl
+import com.example.parentsync.data.repository.SyncRepositoryImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 object ScreenMirroringService {
     private const val TAG = "ScreenMirroringService"
 
     var latestDecorViewBitmap: Bitmap? = null
+
+    private var broadcastingJob: Job? = null
+    private val broadcastingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun startSnapshotBroadcasting(context: Context, childId: String, apiKey: String, authToken: String) {
+        stopSnapshotBroadcasting()
+        broadcastingJob = broadcastingScope.launch {
+            val appContext = context.applicationContext
+            val appUsageRepo = AppUsageRepositoryImpl(appContext)
+            val syncRepo = SyncRepositoryImpl(appContext, appUsageRepo)
+            while (isActive) {
+                try {
+                    syncRepo.syncNow(childId, apiKey, authToken)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in 1-second screen snapshot broadcasting & telemetry sync", e)
+                }
+                delay(1000L)
+            }
+        }
+    }
+
+    fun stopSnapshotBroadcasting() {
+        broadcastingJob?.cancel()
+        broadcastingJob = null
+    }
 
     fun captureScreenSnapshotBase64(context: Context): String? {
         return try {
@@ -84,11 +118,11 @@ object ScreenMirroringService {
                     false
                 }
 
-                canvas.drawText("Device Status: Active Stream", 40f, 160f, detailPaint)
+                canvas.drawText("Device Status: Active 1s Stream", 40f, 160f, detailPaint)
                 canvas.drawText("Lock State: ${if (isLocked) "LOCKED 🔒" else "Unlocked 🔓"}", 40f, 195f, detailPaint)
                 canvas.drawText("Active Window: MainActivity", 40f, 230f, detailPaint)
                 canvas.drawText("Protection: Active Monitoring", 40f, 265f, detailPaint)
-                canvas.drawText("Sync Protocol: Real-Time WebRTC/Supabase", 40f, 300f, detailPaint)
+                canvas.drawText("Sync Protocol: 1s Real-Time Supabase", 40f, 300f, detailPaint)
 
                 // Footer Active Indicator
                 val footerPaint = Paint().apply {
@@ -103,7 +137,7 @@ object ScreenMirroringService {
                     isAntiAlias = true
                     typeface = Typeface.DEFAULT_BOLD
                 }
-                canvas.drawText("Live Mirroring Stream Active", 60f, 390f, footerTextPaint)
+                canvas.drawText("1s Live Mirroring Active", 60f, 390f, footerTextPaint)
 
                 bmp
             }
