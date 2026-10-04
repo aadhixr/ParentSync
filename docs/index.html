@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParentSync - Web Control Dashboard</title>
+    <title>ParentSync - Web Control Dashboard & Live Screen Viewer</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -37,7 +37,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">ParentSync</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Child Device Remote Control & Monitoring Center</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Child Device Live Mirror & Remote Control Center</p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
@@ -53,7 +53,7 @@
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
-        <!-- Configuration Section (Collapsible / Modal or Banner) -->
+        <!-- Configuration Section -->
         <div id="configSection" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hidden">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
@@ -64,7 +64,7 @@
                 </button>
             </div>
             <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                Connected to Supabase project for live device telemetry and remote command dispatching.
+                Connected to Supabase project for live screen streaming, telemetry, and instant remote command dispatching.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -126,9 +126,9 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                                <i data-lucide="bar-chart-3" class="w-5 h-5 mr-2 text-indigo-600"></i> App Activity Usage
+                                <i data-lucide="bar-chart-3" class="w-5 h-5 mr-2 text-indigo-600"></i> App Activity Usage & Control
                             </h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time usage statistics synced from child's phone</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time usage statistics and instant remote enforcement</p>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-lg" id="totalScreenTimeBadge">Total Today: 0h 0m</span>
@@ -155,27 +155,53 @@
                 </div>
             </div>
 
-            <!-- Right Column: Remote Control Panel -->
+            <!-- Right Column: Live Screen Viewer & Remote Control Panel -->
             <div class="space-y-8">
+                <!-- Live Screen Mirroring Viewer Panel -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i data-lucide="monitor" class="w-5 h-5 mr-2 text-indigo-600"></i> Live Screen Mirror
+                        </h2>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Live
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Periodic high-fidelity screen snapshot streamed in real-time from child device.</p>
+                    <div class="relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-700 aspect-[9/16] flex items-center justify-center shadow-inner">
+                        <img id="liveScreenSnapshot" src="" alt="Live Screen Stream" class="w-full h-full object-contain hidden">
+                        <div id="screenPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                            <i data-lucide="smartphone" class="w-12 h-12 mb-2 opacity-40 animate-pulse text-indigo-400"></i>
+                            <p class="text-xs font-medium text-slate-300">Waiting for live screen stream snapshot...</p>
+                            <p class="text-[10px] text-slate-500 mt-1">Snapshots update automatically every sync cycle.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remote Control Panel -->
                 <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                     <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center mb-6">
                         <i data-lucide="shield-alert" class="w-5 h-5 mr-2 text-indigo-600"></i> Remote Control Panel
                     </h2>
-                    <div class="space-y-4">
-                        <button onclick="sendCommand('LOCK_DEVICE')" class="w-full flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition text-red-700 dark:text-red-300 font-medium">
-                            <span class="flex items-center"><i data-lucide="lock" class="w-5 h-5 mr-3 text-red-600"></i> Instant Lock Device</span>
+                    <div class="space-y-3">
+                        <button onclick="sendCommand('LOCK_DEVICE')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition text-red-700 dark:text-red-300 font-medium text-sm">
+                            <span class="flex items-center"><i data-lucide="lock" class="w-4 h-4 mr-3 text-red-600"></i> Instant Lock Device</span>
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="sendCommand('UNLOCK_DEVICE')" class="w-full flex items-center justify-between p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition text-emerald-700 dark:text-emerald-300 font-medium">
-                            <span class="flex items-center"><i data-lucide="unlock" class="w-5 h-5 mr-3 text-emerald-600"></i> Unlock Device</span>
+                        <button onclick="sendCommand('UNLOCK_DEVICE')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition text-emerald-700 dark:text-emerald-300 font-medium text-sm">
+                            <span class="flex items-center"><i data-lucide="unlock" class="w-4 h-4 mr-3 text-emerald-600"></i> Unlock Device</span>
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="openBlockAppModal()" class="w-full flex items-center justify-between p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition text-amber-700 dark:text-amber-300 font-medium">
-                            <span class="flex items-center"><i data-lucide="ban" class="w-5 h-5 mr-3 text-amber-600"></i> Block Selected App</span>
+                        <button onclick="openBlockAppModal()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition text-amber-700 dark:text-amber-300 font-medium text-sm">
+                            <span class="flex items-center"><i data-lucide="ban" class="w-4 h-4 mr-3 text-amber-600"></i> Block App</span>
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="openQuotaModal()" class="w-full flex items-center justify-between p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition text-indigo-700 dark:text-indigo-300 font-medium">
-                            <span class="flex items-center"><i data-lucide="clock" class="w-5 h-5 mr-3 text-indigo-600"></i> Update Daily Quotas</span>
+                        <button onclick="openForceCloseModal()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition text-purple-700 dark:text-purple-300 font-medium text-sm">
+                            <span class="flex items-center"><i data-lucide="x-circle" class="w-4 h-4 mr-3 text-purple-600"></i> Force Close App</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="openQuotaModal()" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition text-indigo-700 dark:text-indigo-300 font-medium text-sm">
+                            <span class="flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-3 text-indigo-600"></i> Update Quota</span>
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -196,7 +222,7 @@
     <div id="blockAppModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl border border-slate-200 dark:border-slate-700">
             <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Block Selected App</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Choose an app to block instantly on the child's device.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Choose an app package name to block instantly on the child's device.</p>
             <div class="space-y-3 mb-4">
                 <label for="blockAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Package Name / App ID</label>
                 <input type="text" id="blockAppSelect" placeholder="com.zhiliaoapp.musically" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -204,6 +230,22 @@
             <div class="flex justify-end space-x-3">
                 <button onclick="closeModals()" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl text-sm font-medium">Cancel</button>
                 <button onclick="submitBlockApp()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium">Block App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Force Close App Modal -->
+    <div id="forceCloseModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl border border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Force Close Running App</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Terminate running background processes using ActivityManager and restrict app.</p>
+            <div class="space-y-3 mb-4">
+                <label for="forceCloseAppSelect" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Package Name / App ID</label>
+                <input type="text" id="forceCloseAppSelect" placeholder="com.example.app" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeModals()" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl text-sm font-medium">Cancel</button>
+                <button onclick="submitForceClose()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium">Force Close</button>
             </div>
         </div>
     </div>
@@ -239,7 +281,6 @@
     <script>
         lucide.createIcons();
 
-        // Hardcoded Supabase Credentials
         const SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co";
         const SUPABASE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb";
 
@@ -261,6 +302,7 @@
             isCharging: false,
             isOnline: false,
             lastSynced: "Never",
+            screenSnapshot: null,
             apps: []
         };
 
@@ -279,6 +321,18 @@
             } else {
                 badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
                 badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span> Offline';
+            }
+
+            // Screen snapshot rendering
+            const imgEl = document.getElementById('liveScreenSnapshot');
+            const placeholderEl = document.getElementById('screenPlaceholder');
+            if (dashboardData.screenSnapshot) {
+                imgEl.src = dashboardData.screenSnapshot;
+                imgEl.classList.remove('hidden');
+                placeholderEl.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                placeholderEl.classList.remove('hidden');
             }
 
             // Total Screen Time
@@ -310,8 +364,11 @@
                             ${app.status}
                         </span>
                     </td>
-                    <td class="py-3.5 px-4 text-right">
-                        <button onclick="toggleAppStatus('${app.packageName}')" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <td class="py-3.5 px-4 text-right space-x-1">
+                        <button onclick="sendCommand('FORCE_CLOSE_APP', '${app.packageName}')" class="px-2.5 py-1 text-xs font-medium rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition">
+                            Force Close
+                        </button>
+                        <button onclick="toggleAppStatus('${app.packageName}')" class="px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                             ${app.status === 'Blocked' ? 'Unblock' : 'Block'}
                         </button>
                     </td>
@@ -383,13 +440,13 @@
                     if (rows && rows.length > 0) {
                         const latest = rows[0];
 
-                        // Parse required fields: device_id, battery_level, is_charging, app_usage_json
                         const deviceId = latest.device_id || latest.deviceId || "child_alex_01";
                         const batteryLevel = latest.battery_level !== undefined ? latest.battery_level : (latest.batteryLevel !== undefined ? latest.batteryLevel : 0);
                         const isCharging = latest.is_charging !== undefined ? latest.is_charging : (latest.isCharging !== undefined ? latest.isCharging : false);
                         const appUsageJson = latest.app_usage_json || latest.appUsageReports || latest.app_usage_reports || [];
                         const isOnline = latest.is_online !== undefined ? latest.is_online : (latest.isOnline !== undefined ? latest.isOnline : true);
                         const updatedAt = latest.updated_at || latest.sync_timestamp || latest.timestamp || Date.now();
+                        const screenSnapshot = latest.screen_snapshot || latest.screenSnapshot || null;
 
                         dashboardData.childId = deviceId;
                         dashboardData.deviceName = `Alex's Device (${deviceId})`;
@@ -398,6 +455,7 @@
                         dashboardData.isCharging = isCharging;
                         dashboardData.isOnline = isOnline;
                         dashboardData.lastSynced = new Date(updatedAt).toLocaleTimeString();
+                        dashboardData.screenSnapshot = screenSnapshot;
 
                         if (Array.isArray(appUsageJson)) {
                             dashboardData.apps = appUsageJson.map(report => ({
@@ -417,7 +475,7 @@
             setTimeout(() => {
                 if (refreshIcon) refreshIcon.classList.remove('animate-spin');
                 renderDashboard();
-                logCommand("SYNC", "Refreshed device status from Supabase device_reports.");
+                logCommand("SYNC", "Refreshed device status & live screen from Supabase.");
             }, 600);
         }
 
@@ -464,6 +522,10 @@
                 const app = dashboardData.apps.find(a => a.packageName === packageName);
                 if (app) app.status = 'Allowed';
                 renderDashboard();
+            } else if (commandType === 'FORCE_CLOSE_APP' && packageName) {
+                const app = dashboardData.apps.find(a => a.packageName === packageName);
+                if (app) app.status = 'Blocked';
+                renderDashboard();
             }
         }
 
@@ -483,12 +545,17 @@
             document.getElementById('blockAppModal').classList.remove('hidden');
         }
 
+        function openForceCloseModal() {
+            document.getElementById('forceCloseModal').classList.remove('hidden');
+        }
+
         function openQuotaModal() {
             document.getElementById('quotaModal').classList.remove('hidden');
         }
 
         function closeModals() {
             document.getElementById('blockAppModal').classList.add('hidden');
+            document.getElementById('forceCloseModal').classList.add('hidden');
             document.getElementById('quotaModal').classList.add('hidden');
         }
 
@@ -500,6 +567,16 @@
             }
             closeModals();
             sendCommand('BLOCK_APP', pkg);
+        }
+
+        function submitForceClose() {
+            const pkg = document.getElementById('forceCloseAppSelect').value.trim();
+            if (!pkg) {
+                alert("Please enter a package name.");
+                return;
+            }
+            closeModals();
+            sendCommand('FORCE_CLOSE_APP', pkg);
         }
 
         function submitQuotaUpdate() {

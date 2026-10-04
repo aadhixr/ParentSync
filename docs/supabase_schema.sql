@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.device_reports (
     device_locked BOOLEAN,
     is_online BOOLEAN,
     sync_timestamp BIGINT,
+    screen_snapshot TEXT,
     app_usage_reports JSONB,
     device_status JSONB,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())

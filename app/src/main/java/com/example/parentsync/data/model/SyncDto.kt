@@ -21,6 +21,7 @@ data class DeviceStatusDto(
     @Json(name = "device_locked") @SerialName("device_locked") val deviceLocked: Boolean,
     @Json(name = "installed_apps") @SerialName("installed_apps") val installedApps: List<InstalledAppDto>,
     @Json(name = "is_online") @SerialName("is_online") val isOnline: Boolean,
+    @Json(name = "screen_snapshot") @SerialName("screen_snapshot") val screenSnapshot: String? = null,
     @Json(name = "timestamp") @SerialName("timestamp") val timestamp: Long
 )
 

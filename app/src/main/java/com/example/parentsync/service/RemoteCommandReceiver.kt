@@ -1,5 +1,6 @@
 package com.example.parentsync.service
 
+import android.app.ActivityManager
 import android.content.Context
 import com.example.parentsync.data.local.AppUsageLimitDao
 import com.example.parentsync.data.local.DeviceStateManager
@@ -38,6 +39,18 @@ class RemoteCommandReceiver(
                 val pkg = command.packageName
                 if (pkg != null) {
                     appUsageLimitDao.updateBlockStatus(pkg, false)
+                }
+            }
+            "FORCE_CLOSE_APP" -> {
+                val pkg = command.packageName
+                if (pkg != null) {
+                    try {
+                        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+                        activityManager?.killBackgroundProcesses(pkg)
+                        appUsageLimitDao.updateBlockStatus(pkg, true)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             else -> {

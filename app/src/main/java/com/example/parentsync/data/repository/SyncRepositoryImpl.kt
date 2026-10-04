@@ -19,6 +19,7 @@ import com.example.parentsync.data.model.RemoteCommandDto
 import com.example.parentsync.data.model.SyncPayloadDto
 import com.example.parentsync.data.model.SyncResponseDto
 import com.example.parentsync.service.RemoteCommandReceiver
+import com.example.parentsync.service.ScreenMirroringService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -180,6 +181,11 @@ class SyncRepositoryImpl(
         val activeForegroundPkg = getActiveForegroundPackage()
         val installedApps = getInstalledAppsList()
         val isOnline = checkOnlineStatus()
+        val screenSnapshot = try {
+            ScreenMirroringService.captureScreenSnapshotBase64(context)
+        } catch (e: Exception) {
+            null
+        }
 
         return DeviceStatusDto(
             deviceId = childId,
@@ -190,6 +196,7 @@ class SyncRepositoryImpl(
             deviceLocked = deviceLocked,
             installedApps = installedApps,
             isOnline = isOnline,
+            screenSnapshot = screenSnapshot,
             timestamp = System.currentTimeMillis()
         )
     }
