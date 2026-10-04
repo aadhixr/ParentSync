@@ -35,37 +35,7 @@ class RemoteDashboardViewModel(application: Application) : AndroidViewModel(appl
     )
     val lastSyncTimestamp: StateFlow<String> = _lastSyncTimestamp.asStateFlow()
 
-    private val _connectedDevices = MutableStateFlow(
-        listOf(
-            ConnectedDevice(
-                id = "dev_1",
-                name = "Alex's Phone",
-                deviceModel = "Pixel 7",
-                batteryLevel = 84,
-                isOnline = true,
-                lastSyncTime = "2 mins ago",
-                screenTimeTodayMinutes = 185
-            ),
-            ConnectedDevice(
-                id = "dev_2",
-                name = "Emma's Tablet",
-                deviceModel = "Galaxy Tab S9",
-                batteryLevel = 62,
-                isOnline = true,
-                lastSyncTime = "5 mins ago",
-                screenTimeTodayMinutes = 240
-            ),
-            ConnectedDevice(
-                id = "dev_3",
-                name = "Noah's Phone",
-                deviceModel = "Moto G Power",
-                batteryLevel = 19,
-                isOnline = false,
-                lastSyncTime = "2 hours ago",
-                screenTimeTodayMinutes = 95
-            )
-        )
-    )
+    private val _connectedDevices = MutableStateFlow<List<ConnectedDevice>>(emptyList())
     val connectedDevices: StateFlow<List<ConnectedDevice>> = _connectedDevices.asStateFlow()
 
     private val _bedtimeModeEnabled = MutableStateFlow(false)

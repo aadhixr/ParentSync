@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
+import android.util.Log
 import com.example.parentsync.data.api.SyncApiClient
 import com.example.parentsync.data.api.SyncApiService
 import com.example.parentsync.data.local.DeviceStateManager
@@ -28,10 +29,25 @@ class SyncRepositoryImpl(
     private val apiService: SyncApiService = SyncApiClient.create()
 ) : SyncRepository {
 
+    companion object {
+        private const val TAG = "SyncRepositoryImpl"
+    }
+
     override suspend fun syncNow(childId: String, apiKey: String, authToken: String): Result<SyncResponseDto> = withContext(Dispatchers.IO) {
         try {
-            val deviceStatus = gatherDeviceStatus(childId)
-            val appUsageReports = gatherAppUsageReports()
+            val deviceStatus = try {
+                gatherDeviceStatus(childId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error gathering device status", e)
+                return@withContext Result.failure(e)
+            }
+
+            val appUsageReports = try {
+                gatherAppUsageReports()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error gathering app usage reports", e)
+                emptyList()
+            }
 
             val payload = SyncPayloadDto(
                 childId = childId,
@@ -47,28 +63,44 @@ class SyncRepositoryImpl(
                     payload = payload
                 )
             } catch (e: Exception) {
-                apiService.updateDeviceData(
-                    apiKey = apiKey,
-                    authorization = "Bearer $authToken",
-                    payload = payload
-                )
+                Log.w(TAG, "Primary sync endpoint failed, trying update endpoint", e)
+                try {
+                    apiService.updateDeviceData(
+                        apiKey = apiKey,
+                        authorization = "Bearer $authToken",
+                        payload = payload
+                    )
+                } catch (inner: Exception) {
+                    Log.e(TAG, "Secondary sync endpoint also failed", inner)
+                    return@withContext Result.failure(inner)
+                }
             }
 
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                val errorMsg = response.errorBody()?.string() ?: "Unknown sync error"
+                val errorMsg = try {
+                    response.errorBody()?.string() ?: "Unknown sync error"
+                } catch (e: Exception) {
+                    "Unknown sync error"
+                }
+                Log.e(TAG, "Sync failed with code ${response.code()}: $errorMsg")
                 Result.failure(Exception("Sync failed: ${response.code()} - $errorMsg"))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Critical syncNow exception", e)
             Result.failure(e)
         }
     }
 
-    override suspend fun queueSyncData(childId: String) = withContext(Dispatchers.IO) {
-        val deviceStatus = gatherDeviceStatus(childId)
-        val appUsageReports = gatherAppUsageReports()
-        // Queueing logic for offline storage or local cache if needed
+    override suspend fun queueSyncData(childId: String): Unit = withContext(Dispatchers.IO) {
+        try {
+            val deviceStatus = try { gatherDeviceStatus(childId) } catch (e: Exception) { null }
+            val appUsageReports = try { gatherAppUsageReports() } catch (e: Exception) { emptyList() }
+            Log.i(TAG, "Queued sync data for child: $childId (status present: ${deviceStatus != null}, reports: ${appUsageReports.size})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error queueing sync data", e)
+        }
     }
 
     override suspend fun pollCommands(childId: String, apiKey: String, authToken: String): Result<List<RemoteCommandDto>> = withContext(Dispatchers.IO) {
@@ -76,29 +108,45 @@ class SyncRepositoryImpl(
             val response = try {
                 apiService.fetchCommands(apiKey, "Bearer $authToken", childId)
             } catch (e: Exception) {
-                apiService.genericFetchCommands(apiKey, childId)
+                Log.w(TAG, "Primary fetchCommands failed, trying generic endpoint", e)
+                try {
+                    apiService.genericFetchCommands(apiKey, childId)
+                } catch (inner: Exception) {
+                    Log.e(TAG, "Generic fetchCommands also failed", inner)
+                    null
+                }
             }
 
-            if (response.isSuccessful && response.body() != null) {
+            if (response != null && response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
                 Result.success(emptyList())
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Critical pollCommands exception", e)
             Result.success(emptyList())
         }
     }
 
-    override suspend fun executeCommand(command: RemoteCommandDto) = withContext(Dispatchers.IO) {
-        val dao = ParentSyncDatabase.getDatabase(context).appUsageLimitDao()
-        val receiver = RemoteCommandReceiver(context, dao)
-        receiver.receiveCommand(command)
+    override suspend fun executeCommand(command: RemoteCommandDto): Unit = withContext(Dispatchers.IO) {
+        try {
+            val dao = ParentSyncDatabase.getDatabase(context).appUsageLimitDao()
+            val receiver = RemoteCommandReceiver(context, dao)
+            receiver.receiveCommand(command)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error executing command", e)
+        }
     }
 
     private fun gatherDeviceStatus(childId: String): DeviceStatusDto {
-        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { filter ->
-            context.registerReceiver(null, filter)
+        val batteryStatus: Intent? = try {
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { filter ->
+                context.registerReceiver(null, filter)
+            }
+        } catch (e: Exception) {
+            null
         }
+
         val batteryPct: Float = batteryStatus?.let { intent ->
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
@@ -120,7 +168,12 @@ class SyncRepositoryImpl(
             else -> "Unknown"
         }
 
-        val deviceLocked = DeviceStateManager.getInstance(context).isDeviceLocked.value
+        val deviceLocked = try {
+            DeviceStateManager.getInstance(context).isDeviceLocked.value
+        } catch (e: Exception) {
+            false
+        }
+
         val activeForegroundPkg = getActiveForegroundPackage()
         val installedApps = getInstalledAppsList()
         val isOnline = checkOnlineStatus()
@@ -139,49 +192,69 @@ class SyncRepositoryImpl(
     }
 
     private fun getActiveForegroundPackage(): String? {
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
-        val endTime = System.currentTimeMillis()
-        val startTime = endTime - 1000 * 60 * 5 // last 5 minutes
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime)
-        if (stats.isNullOrEmpty()) return null
-        return stats.maxByOrNull { it.lastTimeUsed }?.packageName
+        return try {
+            val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
+            val endTime = System.currentTimeMillis()
+            val startTime = endTime - 1000 * 60 * 5 // last 5 minutes
+            val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime)
+            if (stats.isNullOrEmpty()) return null
+            stats.maxByOrNull { it.lastTimeUsed }?.packageName
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting active foreground package", e)
+            null
+        }
     }
 
     private fun getInstalledAppsList(): List<InstalledAppDto> {
-        val pm = context.packageManager
-        val packages = pm.getInstalledPackages(0)
-        return packages.map { pkgInfo ->
-            val appName = try {
-                pkgInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() } ?: pkgInfo.packageName
-            } catch (e: Exception) {
-                pkgInfo.packageName
+        return try {
+            val pm = context.packageManager
+            val packages = pm.getInstalledPackages(0)
+            packages.map { pkgInfo ->
+                val appName = try {
+                    pkgInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() } ?: pkgInfo.packageName
+                } catch (e: Exception) {
+                    pkgInfo.packageName
+                }
+                val isSystem = (pkgInfo.applicationInfo?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0
+                InstalledAppDto(
+                    packageName = pkgInfo.packageName,
+                    appName = appName,
+                    isSystemApp = isSystem
+                )
             }
-            val isSystem = (pkgInfo.applicationInfo?.flags ?: 0) and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0
-            InstalledAppDto(
-                packageName = pkgInfo.packageName,
-                appName = appName,
-                isSystemApp = isSystem
-            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting installed apps list", e)
+            emptyList()
         }
     }
 
     private suspend fun gatherAppUsageReports(): List<AppUsageReportDto> {
-        val usages = appUsageRepository.getAppUsageStats().first()
-        return usages.map { usage ->
-            AppUsageReportDto(
-                packageName = usage.packageName,
-                appName = usage.appName,
-                usageTimeMillis = usage.usageTimeMillis,
-                category = usage.category.name,
-                timestamp = usage.lastTimeUsed
-            )
+        return try {
+            val usages = appUsageRepository.getAppUsageStats().first()
+            usages.map { usage ->
+                AppUsageReportDto(
+                    packageName = usage.packageName,
+                    appName = usage.appName,
+                    usageTimeMillis = usage.usageTimeMillis,
+                    category = usage.category.name,
+                    timestamp = usage.lastTimeUsed
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error gathering app usage reports", e)
+            emptyList()
         }
     }
 
     private fun checkOnlineStatus(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        return try {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+            val network = connectivityManager.activeNetwork ?: return false
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking online status", e)
+            false
+        }
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.parentsync.data.model.AppCategory
@@ -129,7 +130,7 @@ fun AppActivityTrackingScreen(
                 }
             }
 
-            // App Usage List Header
+            // App Usage List Header & Items
             item {
                 Row(
                     modifier = Modifier
@@ -151,9 +152,47 @@ fun AppActivityTrackingScreen(
                 }
             }
 
-            // App Usage Items
-            items(appUsages, key = { it.packageName }) { appUsage ->
-                AppUsageItemCard(appUsage = appUsage)
+            if (appUsages.isEmpty()) {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(24.dp)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Analytics,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Grant Usage Access permission to view live app activity",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "No app usage statistics available yet today. Please ensure Usage Access permission is granted.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            } else {
+                items(appUsages, key = { it.packageName }) { appUsage ->
+                    AppUsageItemCard(appUsage = appUsage)
+                }
             }
         }
     }

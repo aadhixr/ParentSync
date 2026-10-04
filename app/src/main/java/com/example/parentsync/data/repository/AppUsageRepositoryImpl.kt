@@ -61,42 +61,19 @@ class AppUsageRepositoryImpl(
         val usages = if (hasUsageStatsPermission()) {
             val statsUsages = queryRealUsageStats()
             if (statsUsages.isEmpty()) {
-                queryInstalledPackagesAsUsage()
+                emptyList()
             } else {
                 statsUsages
             }
         } else {
-            queryInstalledPackagesAsUsage()
+            emptyList()
         }
 
         _appUsages.value = usages.sortedByDescending { it.usageTimeMillis }
         calculateSummaryAndBreakdowns(usages)
     }
 
-    private fun queryInstalledPackagesAsUsage(): List<AppUsage> {
-        val packageManager = context.packageManager
-        val packages = try {
-            packageManager.getInstalledPackages(0)
-        } catch (e: Exception) {
-            emptyList()
-        }
-        return packages.map { pkgInfo ->
-            val packageName = pkgInfo.packageName
-            val appName = try {
-                pkgInfo.applicationInfo?.let { packageManager.getApplicationLabel(it).toString() } ?: packageName
-            } catch (e: Exception) {
-                packageName
-            }
-            val category = categorizeApp(packageName, appName)
-            AppUsage(
-                packageName = packageName,
-                appName = appName,
-                usageTimeMillis = 0L,
-                category = category,
-                lastTimeUsed = pkgInfo.firstInstallTime
-            )
-        }
-    }
+
 
     private fun queryRealUsageStats(): List<AppUsage> {
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
