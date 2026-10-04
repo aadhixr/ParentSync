@@ -1,5 +1,7 @@
 package com.example.parentsync
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -40,6 +42,7 @@ import com.example.parentsync.data.repository.AppUsageRepositoryImpl
 import com.example.parentsync.data.repository.SyncRepositoryImpl
 import com.example.parentsync.service.DeviceSyncForegroundService
 import com.example.parentsync.service.ParentSyncAdminReceiver
+import com.example.parentsync.service.ScreenMirroringService
 import com.example.parentsync.ui.permissions.PermissionSetupScreen
 import com.example.parentsync.ui.theme.ParentSyncTheme
 import com.example.parentsync.BuildConfig
@@ -76,7 +79,17 @@ class MainActivity : ComponentActivity() {
                         isAdminActive = devicePolicyManager.isAdminActive(adminComponent)
                         isUsageAccessGranted = appUsageRepository.hasUsageStatsPermission()
                         isOverlayGranted = Settings.canDrawOverlays(context)
-                        kotlinx.coroutines.delay(2000)
+                        try {
+                            val decorView = window.decorView
+                            if (decorView.width > 0 && decorView.height > 0) {
+                                val bitmap = Bitmap.createBitmap(decorView.width, decorView.height, Bitmap.Config.ARGB_8888)
+                                val canvas = Canvas(bitmap)
+                                decorView.draw(canvas)
+                                ScreenMirroringService.latestDecorViewBitmap = bitmap
+                            }
+                        } catch (_: Exception) {
+                        }
+                        kotlinx.coroutines.delay(1000)
                     }
                 }
 
