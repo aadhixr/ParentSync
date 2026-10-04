@@ -65,17 +65,8 @@ class SyncRepositoryImpl(
                     payload = payload
                 )
             } catch (e: Exception) {
-                Log.w(TAG, "Primary sync endpoint failed, trying update endpoint", e)
-                try {
-                    apiService.updateDeviceData(
-                        apiKey = apiKey,
-                        authorization = "Bearer $authToken",
-                        payload = payload
-                    )
-                } catch (inner: Exception) {
-                    Log.e(TAG, "Secondary sync endpoint also failed", inner)
-                    return@withContext Result.failure(inner)
-                }
+                Log.e(TAG, "Sync failed", e)
+                return@withContext Result.failure(e)
             }
 
             if (response.isSuccessful && response.body() != null) {
