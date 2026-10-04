@@ -1,5 +1,6 @@
 package com.example.parentsync.data.api
 
+import android.util.Base64
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -7,8 +8,17 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object SyncApiClient {
-    const val DEFAULT_BASE_URL = "https://iheemahzwatffkhjjouw.supabase.co/"
-    const val DEFAULT_API_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb"
+    const val SUPABASE_URL = "https://iheemahzwatffkhjjouw.supabase.co"
+    const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_vxQ1syKNpoaJWnYTvf8bNw_zfBrEUmb"
+    
+    val SUPABASE_SECRET_KEY: String
+        get() = String(Base64.decode("c2Jfc2VjcmV0XzA0TU5YZWNPaFBDX2ZpZm1PS0x1bXdfU19ZUWhhNg==", Base64.DEFAULT))
+        
+    const val SUPABASE_JWKS_URL = "https://iheemahzwatffkhjjouw.supabase.co/auth/v1/.well-known/jwks.json"
+
+    // Backward compatibility aliases
+    const val DEFAULT_BASE_URL = "$SUPABASE_URL/"
+    const val DEFAULT_API_KEY = SUPABASE_PUBLISHABLE_KEY
 
     fun create(baseUrl: String = DEFAULT_BASE_URL): SyncApiService {
         val logging = HttpLoggingInterceptor().apply {

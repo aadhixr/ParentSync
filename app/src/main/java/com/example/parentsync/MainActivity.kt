@@ -45,8 +45,8 @@ class MainActivity : ComponentActivity() {
         DeviceSyncForegroundService.startService(
             this,
             childId = "child_alex_01",
-            apiKey = com.example.parentsync.data.api.SyncApiClient.DEFAULT_API_KEY,
-            authToken = com.example.parentsync.data.api.SyncApiClient.DEFAULT_API_KEY
+            apiKey = com.example.parentsync.data.api.SyncApiClient.SUPABASE_PUBLISHABLE_KEY,
+            authToken = com.example.parentsync.data.api.SyncApiClient.SUPABASE_SECRET_KEY
         )
 
         setContent {
