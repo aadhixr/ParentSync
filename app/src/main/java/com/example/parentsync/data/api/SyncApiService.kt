@@ -8,13 +8,23 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface SyncApiService {
-    @POST("rest/v1/device_sync") // Compatible with Supabase REST API endpoint structure
+    @POST("rest/v1/device_reports") // Supabase REST API endpoint for device reports
     suspend fun syncDeviceData(
         @Header("apikey") apiKey: String,
         @Header("Authorization") authorization: String,
+        @Header("Prefer") prefer: String = "resolution=merge-duplicates",
+        @Body payload: SyncPayloadDto
+    ): Response<SyncResponseDto>
+
+    @PUT("rest/v1/device_reports") // Supabase REST API endpoint for device reports update
+    suspend fun updateDeviceData(
+        @Header("apikey") apiKey: String,
+        @Header("Authorization") authorization: String,
+        @Header("Prefer") prefer: String = "resolution=merge-duplicates",
         @Body payload: SyncPayloadDto
     ): Response<SyncResponseDto>
 

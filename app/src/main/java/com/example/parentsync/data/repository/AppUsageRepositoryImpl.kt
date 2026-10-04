@@ -59,13 +59,43 @@ class AppUsageRepositoryImpl(
 
     private fun loadUsageData() {
         val usages = if (hasUsageStatsPermission()) {
-            queryRealUsageStats()
+            val statsUsages = queryRealUsageStats()
+            if (statsUsages.isEmpty()) {
+                queryInstalledPackagesAsUsage()
+            } else {
+                statsUsages
+            }
         } else {
-            emptyList()
+            queryInstalledPackagesAsUsage()
         }
 
         _appUsages.value = usages.sortedByDescending { it.usageTimeMillis }
         calculateSummaryAndBreakdowns(usages)
+    }
+
+    private fun queryInstalledPackagesAsUsage(): List<AppUsage> {
+        val packageManager = context.packageManager
+        val packages = try {
+            packageManager.getInstalledPackages(0)
+        } catch (e: Exception) {
+            emptyList()
+        }
+        return packages.map { pkgInfo ->
+            val packageName = pkgInfo.packageName
+            val appName = try {
+                pkgInfo.applicationInfo?.let { packageManager.getApplicationLabel(it).toString() } ?: packageName
+            } catch (e: Exception) {
+                packageName
+            }
+            val category = categorizeApp(packageName, appName)
+            AppUsage(
+                packageName = packageName,
+                appName = appName,
+                usageTimeMillis = 0L,
+                category = category,
+                lastTimeUsed = pkgInfo.firstInstallTime
+            )
+        }
     }
 
     private fun queryRealUsageStats(): List<AppUsage> {
@@ -143,8 +173,8 @@ class AppUsageRepositoryImpl(
 
     private fun calculateSummaryAndBreakdowns(usages: List<AppUsage>) {
         val totalMillis = usages.sumOf { it.usageTimeMillis }
-        val dailyAverageMillis = (totalMillis * 0.9).toLong() // Simulated average
-        val comparison = -8 // e.g. 8% less than yesterday
+        val dailyAverageMillis = totalMillis
+        val comparison = 0
 
         _screenTimeSummary.value = ScreenTimeSummary(
             totalUsageMillis = totalMillis,

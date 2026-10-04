@@ -80,8 +80,8 @@ class DeviceSyncForegroundService : Service() {
         }
 
         val childId = intent?.getStringExtra(EXTRA_CHILD_ID) ?: "default_child_device"
-        val apiKey = intent?.getStringExtra(EXTRA_API_KEY) ?: "dummy_api_key"
-        val authToken = intent?.getStringExtra(EXTRA_AUTH_TOKEN) ?: "dummy_token"
+        val apiKey = intent?.getStringExtra(EXTRA_API_KEY) ?: com.example.parentsync.data.api.SyncApiClient.SUPABASE_PUBLISHABLE_KEY
+        val authToken = intent?.getStringExtra(EXTRA_AUTH_TOKEN) ?: com.example.parentsync.data.api.SyncApiClient.SUPABASE_SECRET_KEY
 
         val notification = createNotification()
 

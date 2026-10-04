@@ -40,11 +40,19 @@ class SyncRepositoryImpl(
                 syncTimestamp = System.currentTimeMillis()
             )
 
-            val response = apiService.syncDeviceData(
-                apiKey = apiKey,
-                authorization = "Bearer $authToken",
-                payload = payload
-            )
+            val response = try {
+                apiService.syncDeviceData(
+                    apiKey = apiKey,
+                    authorization = "Bearer $authToken",
+                    payload = payload
+                )
+            } catch (e: Exception) {
+                apiService.updateDeviceData(
+                    apiKey = apiKey,
+                    authorization = "Bearer $authToken",
+                    payload = payload
+                )
+            }
 
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
