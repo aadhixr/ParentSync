@@ -50,9 +50,11 @@ class SyncRepositoryImpl(
             }
 
             val payload = SyncPayloadDto(
-                childId = childId,
-                deviceStatus = deviceStatus,
+                deviceId = childId,
+                batteryLevel = deviceStatus.batteryLevel,
+                isCharging = deviceStatus.isCharging,
                 appUsageReports = appUsageReports,
+                deviceStatus = deviceStatus,
                 syncTimestamp = System.currentTimeMillis()
             )
 

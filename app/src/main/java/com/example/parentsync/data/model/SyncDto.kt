@@ -35,9 +35,11 @@ data class AppUsageReportDto(
 
 @JsonClass(generateAdapter = true)
 data class SyncPayloadDto(
-    @Json(name = "device_id") @SerialName("device_id") val childId: String,
-    @Json(name = "device_status") @SerialName("device_status") val deviceStatus: DeviceStatusDto,
+    @Json(name = "device_id") @SerialName("device_id") val deviceId: String,
+    @Json(name = "battery_level") @SerialName("battery_level") val batteryLevel: Float,
+    @Json(name = "is_charging") @SerialName("is_charging") val isCharging: Boolean,
     @Json(name = "app_usage_json") @SerialName("app_usage_json") val appUsageReports: List<AppUsageReportDto>,
+    @Json(name = "device_status") @SerialName("device_status") val deviceStatus: DeviceStatusDto,
     @Json(name = "sync_timestamp") @SerialName("sync_timestamp") val syncTimestamp: Long
 )
 
